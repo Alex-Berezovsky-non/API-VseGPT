@@ -33,4 +33,52 @@ PROMPT_CONSPECT_WRITER = """
 
 Отрезок текста с которым ты работаешь, с которого ты будешь работать:
 {text_to_work}
-"""  
+"""
+async def get_ai_request(prompt: str, model: str = "openai/gpt-4o-mini", max_tokens: int = 16000, temperature: float = 0.7) -> str:
+    """
+    Отправляет асинхронный запрос к API VseGPT и возвращает ответ.
+    """
+    response = await client.chat.completions.create(
+        model=model,
+        messages=[{"role": "user", "content": prompt}],
+        max_tokens=max_tokens,
+        temperature=temperature,
+    )
+    return response.choices[0].message.content
+
+def split_text(text: str, max_chunk_size: int = MAX_CHUNK_SIZE) -> list:
+    """
+    Разделяет текст на части заданного размера.
+    """
+    return [text[i:i + max_chunk_size] for i in range(0, len(text), max_chunk_size)]
+
+async def save_to_markdown(data: list, output_file: str = "output.md"):
+    """
+    Сохраняет результаты в формате Markdown.
+    """
+    with open(output_file, "w", encoding="utf-8") as md_file:
+        for item in data:
+            md_file.write(f"---\n{item}\n---\n")
+
+async def main():
+    from HW_27_data import DATA  # Импортируем данные из файла hw_27_data.py
+
+    # Объединяем весь текст в одну строку
+    full_text = " ".join([item["text"] for item in DATA])
+
+    # Разделяем текст на части
+    chunks = split_text(full_text)
+
+    # Отправляем запросы к API и собираем результаты
+    results = []
+    for chunk in chunks:
+        prompt = PROMPT_CONSPECT_WRITER.format(topic="Bootstrap", full_text=full_text, text_to_work=chunk)
+        result = await get_ai_request(prompt)
+        results.append(result)
+        await asyncio.sleep(SLEEP_TIME)  # Задержка между запросами
+
+    # Сохраняем результаты в Markdown
+    await save_to_markdown(results)
+
+if __name__ == "__main__":
+    asyncio.run(main())  
