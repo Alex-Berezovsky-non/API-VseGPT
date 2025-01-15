@@ -2,7 +2,7 @@ import asyncio
 from openai import AsyncOpenAI
 
 # Конфигурация
-API_KEY = "sk-or-vv-6d94f40d828fc6315c5baa10fd1df2667a02896c11b1c0119d7efc266c45c1e7"
+API_KEY =  "ваш_API_ключ"  # Замените на ваш API-ключ
 BASE_URL = "https://api.vsegpt.ru/v1"
 MAX_CHUNK_SIZE = 2000  # Максимальная длина текста для одного запроса
 SLEEP_TIME = 1  # Задержка между запросами
